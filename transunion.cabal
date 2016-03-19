@@ -23,6 +23,7 @@ library
   hs-source-dirs: lib
   exposed-modules:
       Transunion
+    , Signal
   build-depends:
       base ==4.*
     , parsec
@@ -31,7 +32,6 @@ library
     , safe
     , text
   default-language: Haskell2010
-  ghc-options: -threaded
 
 executable transunion
   hs-source-dirs: executable
@@ -49,11 +49,11 @@ test-suite tests
   build-depends:
       base -any
     , transunion -any
+    , containers
     , hspec ==2.*
     , HUnit -any
     , QuickCheck -any
   default-language:    Haskell2010
   other-modules:
-      Transunion
       TransunionSpec
   ghc-options:         -threaded -rtsopts -with-rtsopts=-N

@@ -4,6 +4,8 @@
 module Transunion where
 
 -- import Control.Applicative
+import Control.Applicative (empty)
+import Data.Foldable (asum)
 import qualified Data.Map as Map
 import Data.Text (Text)
 import Safe (readMay)
@@ -11,27 +13,27 @@ import Text.Parsec
 
 import Signal
 
-readMaybe = readMay
+toSignal :: String -> Signal
+toSignal s = read s :: Signal
 
 type Parser = Parsec String ()
 
+parse' :: Parser a -> String -> Either ParseError a
+parse' rule = parse rule "(source_file)"
+
 parseSignal :: String -> SignalMap
-parseSignal input = Map.fromList $ parse' (many anySignal) input
+parseSignal input = Map.fromList result
+  where
+    result = case parse' (many anySignal) input of
+               Left e -> error "woops"
+               Right r -> r
 
 anySignal :: Parser (Signal, String)
-anySignal = parseWithLeftOver signalParser
+anySignal = do
+  signal <- signalParser
+  content <- manyTill anyToken (lookAhead signalParser)
+  return (toSignal signal, content)
 
--- try mconcat over allSignals
-signalParser :: Parser Signal
-signalParser = string "AD02" <|> string "VS01" <|> string "AH11"
-
-fromSignal :: String -> Maybe Signal
-fromSignal s = readMaybe s :: Maybe Signal
-
-parseWithLeftOver :: Parser a -> String -> Either ParseError (a,String)
-parseWithLeftOver p = parse' ((,) <$> return (fromSignal p) <*> leftOver)
-  where leftOver = manyTill anyToken eof
-
-parse' rule text = parse rule "(source_file)" text
-
+signalParser :: Parser String
+signalParser = choice $ string <$> allSignals
 
