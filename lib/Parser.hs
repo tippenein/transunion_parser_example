@@ -1,7 +1,7 @@
 {-# LANGUAGE FlexibleContexts  #-}
 {-# LANGUAGE OverloadedStrings #-}
 
-module Transunion where
+module Parser where
 
 -- import Control.Applicative
 import Control.Applicative (empty)
@@ -21,19 +21,26 @@ type Parser = Parsec String ()
 parse' :: Parser a -> String -> Either ParseError a
 parse' rule = parse rule "(source_file)"
 
+eol = char '\n'
+
+endOfLineOrInput :: Parser ()
+endOfLineOrInput = eol *> return () <|> eof
+
 parseSignal :: String -> SignalMap
 parseSignal input = Map.fromList result
   where
     result = case parse' (many anySignal) input of
-               Left e -> error "woops"
+               Left err -> error (show err)
                Right r -> r
 
 anySignal :: Parser (Signal, String)
 anySignal = do
   signal <- signalParser
-  content <- manyTill anyToken (lookAhead signalParser)
+  content <- manyTill anyToken (endOfLineOrInput <|> signalLookahead)
   return (toSignal signal, content)
 
+signalLookahead = lookAhead signalParser *> return ()
+
 signalParser :: Parser String
-signalParser = choice $ string <$> allSignals
+signalParser = choice $ fmap try $ string <$> allSignals
 

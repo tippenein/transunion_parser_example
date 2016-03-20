@@ -1,7 +1,7 @@
 module Main (main) where
 
+import Parser
 import System.Environment
-import qualified Transunion
 
 main :: IO ()
 main = undefined
