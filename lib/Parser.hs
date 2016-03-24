@@ -11,6 +11,7 @@ import Data.Text (Text)
 import Safe (readMay)
 import Text.Parsec
 
+import Csv
 import Signal
 
 toSignal :: String -> Signal
@@ -43,4 +44,8 @@ signalLookahead = lookAhead signalParser *> return ()
 
 signalParser :: Parser String
 signalParser = choice $ fmap try $ string <$> allSignals
+
+type TUJson = (String, String)
+fullReconcile :: SignalMap -> [TUJson]
+fullReconcile sm = undefined -- Map.fold fn [] sm
 

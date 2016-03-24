@@ -24,10 +24,14 @@ library
   exposed-modules:
       Parser
     , Signal
+    , Csv
   build-depends:
       base ==4.*
     , parsec
+    , cassava
     , mtl
+    , vector
+    , bytestring
     , containers
     , safe
     , text
