@@ -19,13 +19,16 @@ toSignal s = read s :: Signal
 
 type Parser = Parsec String ()
 
+type SignalMap = Map.Map Signal String
+type SignalConst = (Signal, String)
+
 parse' :: Parser a -> String -> Either ParseError a
 parse' rule = parse rule "(source_file)"
 
-eol = char '\n'
+eol = char '\n' *> return ()
 
 endOfLineOrInput :: Parser ()
-endOfLineOrInput = eol *> return () <|> eof
+endOfLineOrInput = eol <|> eof
 
 parseSignal :: String -> SignalMap
 parseSignal input = Map.fromList result
@@ -46,6 +49,7 @@ signalParser :: Parser String
 signalParser = choice $ fmap try $ string <$> allSignals
 
 type TUJson = (String, String)
+
 fullReconcile :: SignalMap -> [TUJson]
 fullReconcile sm = undefined -- Map.fold fn [] sm
 

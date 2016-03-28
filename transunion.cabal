@@ -24,6 +24,7 @@ library
   exposed-modules:
       Parser
     , Signal
+    , Random
     , Csv
   build-depends:
       base ==4.*
@@ -35,6 +36,7 @@ library
     , containers
     , safe
     , text
+    , QuickCheck -any
   default-language: Haskell2010
 
 executable transunion

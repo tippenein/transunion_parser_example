@@ -48,7 +48,6 @@ data Signal
     YI01 | ZC01
   deriving (Show, Enum, Ord, Eq, Read)
 
-type SignalMap = Map.Map Signal String
 
 allSignals :: [String]
 allSignals = map show [AD02 ..]

@@ -34,4 +34,6 @@ readCsv = do
       Left _ -> fail "bad csv format"
       Right m -> return m
 
+schemaForSignal :: String -> IO (Vector TUData)
 schemaForSignal signal = Vector.filter (\a -> _tuFFRCode a == signal) <$> readCsv
+
