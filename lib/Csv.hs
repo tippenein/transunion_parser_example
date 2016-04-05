@@ -5,12 +5,11 @@ module Csv where
 
 import qualified Data.ByteString.Lazy as LB
 import Data.Char
+import System.IO.Unsafe (unsafePerformIO)
+import Data.List (nub)
 import Data.Csv as Csv
-import Data.Vector as Vector
 import qualified Data.Vector as V
 import GHC.Generics
-
-import Signal
 
 data TUData
   = TUData {
@@ -26,14 +25,19 @@ instance Ord TUData where
 
 instance FromRecord TUData where
 
-readCsv :: IO (V.Vector TUData)
+readCsv :: IO [TUData]
 readCsv = do
   csvData <- LB.readFile "TU41_full_csv_data_file.csv"
   let datas = Csv.decode HasHeader csvData :: Either String (V.Vector TUData)
     in case datas of
       Left _ -> fail "bad csv format"
-      Right m -> return m
+      Right m -> return $ V.toList m
 
-schemaForSignal :: String -> IO (Vector TUData)
-schemaForSignal signal = Vector.filter (\a -> _tuFFRCode a == signal) <$> readCsv
+schemaForSignal :: String -> IO [TUData]
+schemaForSignal signal = filter ((==) signal . _tuFFRCode) <$> readCsv
 
+{-# NOINLINE allSignals #-}
+allSignals :: [String]
+allSignals = unsafePerformIO g
+  where
+    g = nub . map _tuFFRCode <$> readCsv

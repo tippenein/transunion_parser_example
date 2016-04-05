@@ -6,6 +6,6 @@ import Test.QuickCheck
 import Signal
 
 
-instance Variant SignalConst where
-  valid   = liftM SignalConst
-  invalid = liftM SignalConst
+-- instance Variant SignalConst where
+--   valid   = liftM SignalConst
+--   invalid = liftM SignalConst

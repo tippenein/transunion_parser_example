@@ -23,13 +23,14 @@ library
   hs-source-dirs: lib
   exposed-modules:
       Parser
-    , Signal
     , Random
+    , Signal
     , Csv
   build-depends:
       base ==4.*
     , parsec
     , cassava
+    , template-haskell
     , mtl
     , vector
     , bytestring

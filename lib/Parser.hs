@@ -1,5 +1,6 @@
 {-# LANGUAGE FlexibleContexts  #-}
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE TemplateHaskell #-}
 
 module Parser where
 
@@ -13,6 +14,8 @@ import Text.Parsec
 
 import Csv
 import Signal
+
+$(declareSignal Csv.allSignals)
 
 toSignal :: String -> Signal
 toSignal s = read s :: Signal
