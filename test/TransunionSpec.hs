@@ -50,23 +50,22 @@ parserSpec = do
               ]
       reconcileSegment (TU4R, parsed_string) `shouldBe` expected
 
-    -- it "parses out the segments" $ do
-    --   let input_string = "TU4R062311                        1201F 0273814620150824124331"
-    --       parsed = [parseSignal input_string]
-    --       expected = [[("segment_type", "TU4R")
-    --           , ("segment_length", "062")
-    --           , ("version_switch", "3")
-    --           , ("country_code", "1")
-    --           , ("language_indicator", "1")
-    --           , ("user_reference_number", "                        ")
-    --           , ("bureau_market", "12")
-    --           , ("bureau_submarket", "01")
-    --           , ("industry_code", "F ")
-    --           , ("inquiring_subscriber_code", "02738146")
-    --           , ("transaction_date", "20150824")
-    --           , ("transaction_time", "124331")
-    --           ]]
-    --   (reconcileSegments parsed) `shouldBe` expected
+    it "parses out the segments" $ do
+      let inputString = "TU4R062311                        1201F 0273814620150824124331"
+          expected = [[("segment_type", "TU4R")
+              , ("segment_length", "062")
+              , ("version_switch", "3")
+              , ("country_code", "1")
+              , ("language_indicator", "1")
+              , ("user_reference_number", "                        ")
+              , ("bureau_market", "12")
+              , ("bureau_submarket", "01")
+              , ("industry_code", "F ")
+              , ("inquiring_subscriber_code", "02738146")
+              , ("transaction_date", "20150824")
+              , ("transaction_time", "124331")
+              ]]
+      (reconcileSegments inputString) `shouldBe` expected
 
 csvSpec :: Spec
 csvSpec = do

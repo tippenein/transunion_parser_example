@@ -22,7 +22,8 @@ toSignal :: String -> Signal
 toSignal s = read s :: Signal
 
 type Parser = Parsec String ()
-
+type SignalMap = [(Signal, String)]
+type SignalSegment = (String, String)
 
 parse' :: Parser a -> String -> Either ParseError a
 parse' rule = parse rule "(source_file)"
@@ -54,12 +55,11 @@ schemaForSignal signal = unsafePerformIO g
   where
     g = filter ((==) signal . _tuFFRCode) <$> readCsv
 
-type SignalMap = [(Signal, String)]
-type SignalSegment = (String, String)
-
-reconcileSegments :: SignalMap -> [[SignalSegment]]
-reconcileSegments segments =
-  map reconcileSegment segments
+reconcileSegments :: String -> [[SignalSegment]]
+reconcileSegments stringInput =
+  let segments = parseSignal stringInput
+   in
+    map reconcileSegment segments
 
 reconcileSegment :: (Signal, String) -> [SignalSegment]
 reconcileSegment seg =
