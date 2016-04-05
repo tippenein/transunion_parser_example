@@ -1,18 +1,18 @@
 {-# LANGUAGE TemplateHaskell #-}
 module Signal where
 
-import qualified Data.Map as Map
 import qualified Csv
+import qualified Data.Map as Map
 import Language.Haskell.TH
 
 declareSignal :: [String] -> Q [Dec]
 declareSignal s = return [DataD context name vars cons derives] where
-    context  = []
-    name     = mkName "Signal"
-    vars     = []
-    cons     = map (\a -> NormalC (mkName a) []) s
-    fields   = []
-    derives  = [''Show, ''Eq, ''Ord, ''Enum, ''Read]
+  context  = []
+  name     = mkName "Signal"
+  vars     = []
+  cons     = map (\a -> NormalC (mkName a) []) s
+  fields   = []
+  derives  = [''Show, ''Eq, ''Ord, ''Enum, ''Read]
 
 
 --data Signal

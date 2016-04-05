@@ -5,23 +5,24 @@ module Csv where
 
 import qualified Data.ByteString.Lazy as LB
 import Data.Char
-import System.IO.Unsafe (unsafePerformIO)
-import Data.List (nub)
 import Data.Csv as Csv
+import Data.List (nub)
 import qualified Data.Vector as V
 import GHC.Generics
+import System.IO.Unsafe (unsafePerformIO)
 
 data TUData
   = TUData {
-    _tuFFRCode    :: !String  --- should be Signal
+    _tuFFRCode    :: !String
   , _fieldName    :: !String
-  , _displacement :: !Integer
-  , _length       :: !Integer
+  , _displacement :: !Int
+  , _length       :: !Int
   , _type         :: !String
   } deriving (Generic, Show, Eq)
 
 instance Ord TUData where
-  (TUData _ _ d1 _ _) `compare` (TUData _ _ d2 _ _) = d1 `compare` d2
+  (TUData _ _ displacement1 _ _) `compare` (TUData _ _ displacement2 _ _) =
+    displacement1 `compare` displacement2
 
 instance FromRecord TUData where
 
@@ -32,9 +33,6 @@ readCsv = do
     in case datas of
       Left _ -> fail "bad csv format"
       Right m -> return $ V.toList m
-
-schemaForSignal :: String -> IO [TUData]
-schemaForSignal signal = filter ((==) signal . _tuFFRCode) <$> readCsv
 
 {-# NOINLINE allSignals #-}
 allSignals :: [String]
