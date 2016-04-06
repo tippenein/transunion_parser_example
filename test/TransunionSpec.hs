@@ -8,9 +8,7 @@ import qualified Data.Map as Map
 import Test.Hspec
 
 spec :: Spec
-spec = do
-  parserSpec
-  csvSpec
+spec = parserSpec
 
 parserSpec :: Spec
 parserSpec = do
@@ -31,8 +29,9 @@ parserSpec = do
       result `shouldBe` [(AD02, "ffff dd"), (AH11, "ea34xa sdf"), (VS01, "asdf asdf123")]
 
   describe "reconciling" $ do
-    it "can zip together displacements" $ do
-      (zipDisplacements [1,2,3] "abbccc") `shouldBe` ["a", "bb", "ccc"]
+    it "can zip together displacements" $
+      cutSegments [1,2,3] "abbccc" `shouldBe` ["a", "bb", "ccc"]
+
     it "can reconcile a single segment" $ do
       let parsed_string = "062311                        1201F 0273814620150824124331"
           expected = [("segment_type", "TU4R")
@@ -65,10 +64,4 @@ parserSpec = do
               , ("transaction_date", "20150824")
               , ("transaction_time", "124331")
               ]]
-      (reconcileSegments inputString) `shouldBe` expected
-
-csvSpec :: Spec
-csvSpec = do
-  describe "schemaForSignal" $ do
-    it "builds the externally defined objects" $ do
-      True `shouldBe` True
+      reconcileSegments inputString `shouldBe` expected

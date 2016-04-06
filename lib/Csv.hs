@@ -36,6 +36,4 @@ readCsv = do
 
 {-# NOINLINE allSignals #-}
 allSignals :: [String]
-allSignals = unsafePerformIO g
-  where
-    g = nub . map _tuFFRCode <$> readCsv
+allSignals = unsafePerformIO (nub . map _tuFFRCode <$> readCsv)

@@ -51,34 +51,30 @@ signalParser :: Parser String
 signalParser = choice $ fmap try $ string <$> allSignals
 
 schemaForSignal :: String -> [TUData]
-schemaForSignal signal = unsafePerformIO g
-  where
-    g = filter ((==) signal . _tuFFRCode) <$> readCsv
+schemaForSignal signal =
+  unsafePerformIO (filter ((==) signal . _tuFFRCode) <$> readCsv)
 
 reconcileSegments :: String -> [[SignalSegment]]
-reconcileSegments stringInput =
-  let segments = parseSignal stringInput
-   in
-    map reconcileSegment segments
+reconcileSegments = map reconcileSegment . parseSignal
 
 reconcileSegment :: (Signal, String) -> [SignalSegment]
 reconcileSegment seg =
   let displacements = map _length schema
-      fields = map titleToSnakeCase $ map _fieldName schema
+      fields = map (titleToSnakeCase . _fieldName) schema
       signal = fst seg
       content = show signal ++ snd seg
       schema = sort $ schemaForSignal (show signal)
-      contents = zipDisplacements displacements content
+      contents = cutSegments displacements content
    in
-     zipWith (,) fields contents
+     zip fields contents
 
-zipDisplacements :: [Int] -> String -> [String]
-zipDisplacements [] _ = []
-zipDisplacements (i:rest) content =
-  take i content : zipDisplacements rest (drop i content)
+cutSegments :: [Int] -> String -> [String]
+cutSegments [] _ = []
+cutSegments (i:rest) content =
+  take i content : cutSegments rest (drop i content)
 
 titleToSnakeCase :: String -> String
-titleToSnakeCase s = concatMap underscore s
+titleToSnakeCase = concatMap underscore
 
 underscore :: Char -> String
 underscore ' ' = "_"
