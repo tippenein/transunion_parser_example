@@ -4,17 +4,12 @@
 
 module Parser where
 
-import Control.Applicative (empty)
-import Data.Char
-import Data.List
-import qualified Data.Map as Map
-import Data.Text (Text)
-import Safe (readMay)
 import System.IO.Unsafe (unsafePerformIO)
 import Text.Parsec
 
 import Csv
 import Signal
+import Util
 
 $(declareSignal Csv.allSignals)
 
@@ -33,12 +28,6 @@ eol = char '\n' *> return ()
 endOfLineOrInput :: Parser ()
 endOfLineOrInput = eol <|> eof
 
-parseSignal :: String -> SignalMap
-parseSignal input =
-  case parse' (many anySignal) input of
-    Left err -> error (show err)
-    Right r -> r
-
 anySignal :: Parser (Signal, String)
 anySignal = do
   signal <- signalParser
@@ -50,32 +39,32 @@ signalLookahead = lookAhead signalParser *> return ()
 signalParser :: Parser String
 signalParser = choice $ fmap try $ string <$> allSignals
 
-schemaForSignal :: String -> [TUData]
-schemaForSignal signal =
-  unsafePerformIO (filter ((==) signal . _tuFFRCode) <$> readCsv)
+parseSignal :: String -> SignalMap
+parseSignal input =
+  case parse' (many anySignal) input of
+    Left err -> error (show err)
+    Right r -> r
 
-reconcileSegments :: String -> [[SignalSegment]]
+reconcileSegments :: String -> [(Signal, [SignalSegment])]
 reconcileSegments = map reconcileSegment . parseSignal
 
-reconcileSegment :: (Signal, String) -> [SignalSegment]
+reconcileSegment :: (Signal, String) -> (Signal, [SignalSegment])
 reconcileSegment seg =
-  let displacements = map _length schema
+  let (signal,content) = seg
       fields = map (titleToSnakeCase . _fieldName) schema
-      signal = fst seg
-      content = show signal ++ snd seg
-      schema = sort $ schemaForSignal (show signal)
+      schema = schemaForSignal signal
+      displacements = map _length schema
       contents = cutSegments displacements content
    in
-     zip fields contents
+     (signal, zip fields contents)
 
 cutSegments :: [Int] -> String -> [String]
 cutSegments [] _ = []
-cutSegments (i:rest) content =
-  take i content : cutSegments rest (drop i content)
+cutSegments (n:rest) content =
+  take n content : cutSegments rest (drop n content)
 
-titleToSnakeCase :: String -> String
-titleToSnakeCase = concatMap underscore
+schemaForSignal :: Signal -> [TUData]
+schemaForSignal signal =
+  drop 1 $ sort $ -- ignore type info, we already know it
+    unsafePerformIO (filter ((==) (show signal) . _tuFFRCode) <$> readCsv)
 
-underscore :: Char -> String
-underscore ' ' = "_"
-underscore c = [toLower c]

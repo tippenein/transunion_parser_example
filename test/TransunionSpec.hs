@@ -4,20 +4,16 @@ import Csv
 import Parser
 import Signal
 
-import qualified Data.Map as Map
 import Test.Hspec
 
 spec :: Spec
-spec = parserSpec
+spec = do
+  parserSpec
+  stringSpec
 
 parserSpec :: Spec
 parserSpec = do
   describe "signalParser" $ do
-    it "can snakecase" $ do
-      let thing = map titleToSnakeCase ["Some Title", "And Stuff"]
-          expected = ["some_title", "and_stuff"]
-      thing `shouldBe` expected
-
     it "parses out a Signal and it's content" $ do
       let toParse = "AD02ffff "
           result = parseSignal toParse
@@ -34,8 +30,8 @@ parserSpec = do
 
     it "can reconcile a single segment" $ do
       let parsed_string = "062311                        1201F 0273814620150824124331"
-          expected = [("segment_type", "TU4R")
-              , ("segment_length", "062")
+          expected = (TU4R, [
+                ("segment_length", "062")
               , ("version_switch", "3")
               , ("country_code", "1")
               , ("language_indicator", "1")
@@ -46,13 +42,13 @@ parserSpec = do
               , ("inquiring_subscriber_code", "02738146")
               , ("transaction_date", "20150824")
               , ("transaction_time", "124331")
-              ]
+              ])
       reconcileSegment (TU4R, parsed_string) `shouldBe` expected
 
     it "parses out the segments" $ do
       let inputString = "TU4R062311                        1201F 0273814620150824124331"
-          expected = [[("segment_type", "TU4R")
-              , ("segment_length", "062")
+          expected = [(TU4R, [
+                ("segment_length", "062")
               , ("version_switch", "3")
               , ("country_code", "1")
               , ("language_indicator", "1")
@@ -63,5 +59,18 @@ parserSpec = do
               , ("inquiring_subscriber_code", "02738146")
               , ("transaction_date", "20150824")
               , ("transaction_time", "124331")
-              ]]
+              ])]
       reconcileSegments inputString `shouldBe` expected
+
+stringSpec :: Spec
+stringSpec =
+  describe "#snakeCase | #titleCase" $ do
+    it "can snakecase" $ do
+      let thing = map titleToSnakeCase ["Some Title", "And Stuff"]
+          expected = ["some_title", "and_stuff"]
+      thing `shouldBe` expected
+
+    it "can titleize" $ do
+      let thing = snakeToTitleCase "some_title"
+          expected = "Some Title"
+      thing `shouldBe` expected
