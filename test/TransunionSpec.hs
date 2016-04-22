@@ -3,7 +3,9 @@ module TransunionSpec (spec) where
 import Csv
 import Parser
 import Signal
+import Util
 
+import Control.Exception (evaluate)
 import Test.Hspec
 
 spec :: Spec
@@ -15,14 +17,17 @@ parserSpec :: Spec
 parserSpec = do
   describe "signalParser" $ do
     it "parses out a Signal and it's content" $ do
-      let toParse = "AD02ffff "
+      let toParse = "AD02 " ++ replicate 123 'a'
           result = parseSignal toParse
-      result `shouldBe` [(AD02, "ffff ")]
+      (fst . head) result `shouldBe` AD02
 
     it "parses out Signals into pieces" $ do
-      let toParse = "AD02ffff ddAH11ea34xa sdfVS01asdf asdf123"
-          result = parseSignal toParse
-      result `shouldBe` [(AD02, "ffff dd"), (AH11, "ea34xa sdf"), (VS01, "asdf asdf123")]
+      let toParse = "AD02" ++ replicate 123 'a' ++
+                    "AH11" ++ replicate 73 'a' ++
+                    "VS01" ++ replicate 29 'a'
+
+          result = map fst $ parseSignal toParse
+      result `shouldBe` [AD02, AH11, VS01]
 
   describe "reconciling" $ do
     it "can zip together displacements" $
@@ -61,6 +66,12 @@ parserSpec = do
               , ("transaction_time", "124331")
               ])]
       reconcileSegments inputString `shouldBe` expected
+
+    it "shows where an error happened" $ do
+      let inputString = "bad ffr"
+
+      evaluate(reconcileSegments inputString) `shouldThrow` anyErrorCall
+
 
 stringSpec :: Spec
 stringSpec =
